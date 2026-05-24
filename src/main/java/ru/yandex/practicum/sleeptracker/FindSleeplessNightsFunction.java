@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 public class FindSleeplessNightsFunction implements SleepAnalyzer {
 
     static final int MIDDAY = 12;
+    static final int NIGHT_DURATION_HOURS = 6;
 
     @Override
     public SleepAnalysisResult analyze(List<SleepingSession> sessions) {
@@ -30,7 +31,7 @@ public class FindSleeplessNightsFunction implements SleepAnalyzer {
                 .collect(Collectors.toSet());
 
         sessions.stream()
-                .filter(session -> session.getTimeWakeUp().getHour() < 6)
+                .filter(session -> session.getTimeWakeUp().getHour() < NIGHT_DURATION_HOURS)
                 .map(session -> session.getTimeWakeUp().toLocalDate())
                 .forEach(countNightSleep::add);
 
@@ -51,7 +52,7 @@ public class FindSleeplessNightsFunction implements SleepAnalyzer {
     public boolean isNightSleep(SleepingSession session) {
         LocalDate date = session.getTimeWakeUp().toLocalDate();
         LocalDateTime startNight = date.atStartOfDay();
-        LocalDateTime finishNight = startNight.plusHours(6);
+        LocalDateTime finishNight = startNight.plusHours(NIGHT_DURATION_HOURS);
         return session.getTimeAsleep().isBefore(finishNight) && session.getTimeWakeUp().isAfter(startNight);
     }
 }

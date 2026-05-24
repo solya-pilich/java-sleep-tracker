@@ -11,6 +11,13 @@ public class ClassificationUsersFunction implements SleepAnalyzer {
     static final String LARK = "Жаворонок";
     static final String PIGEON = "Голубь";
 
+    static final LocalTime OWL_ASLEEP_AFTER = LocalTime.of(23, 0);
+    static final LocalTime OWL_WAKE_AFTER = LocalTime.of(9, 0);
+    static final LocalTime LARK_ASLEEP_BEFORE = LocalTime.of(22, 0);
+    static final LocalTime LARK_WAKE_BEFORE = LocalTime.of(7, 0);
+
+    static final int NIGHT_DURATION_HOURS = 6;
+
     @Override
     public SleepAnalysisResult analyze(List<SleepingSession> sessions) {
         if (sessions.isEmpty()) {
@@ -22,9 +29,9 @@ public class ClassificationUsersFunction implements SleepAnalyzer {
                 .map(this::classifyNight)
                 .toList();
 
-        long countOwl = birdList.stream().filter(OWL::equals).count();
-        long countLark = birdList.stream().filter(LARK::equals).count();
-        long countPigeon = birdList.stream().filter(PIGEON::equals).count();
+        long countOwl = findCount(birdList, OWL);
+        long countLark = findCount(birdList, LARK);
+        long countPigeon = findCount(birdList, PIGEON);
 
         String result;
         if (countOwl > countLark && countOwl > countPigeon) {
@@ -41,11 +48,11 @@ public class ClassificationUsersFunction implements SleepAnalyzer {
         LocalTime timeAsleep = session.getTimeAsleep().toLocalTime();
         LocalTime timeWakeUp = session.getTimeWakeUp().toLocalTime();
 
-        if (timeAsleep.isAfter(LocalTime.of(23, 0))
-                && timeWakeUp.isAfter(LocalTime.of(9, 0))) {
+        if (timeAsleep.isAfter(OWL_ASLEEP_AFTER)
+                && timeWakeUp.isAfter(OWL_WAKE_AFTER)) {
             return OWL;
-        } else if (timeAsleep.isBefore(LocalTime.of(22, 0))
-                && timeWakeUp.isBefore(LocalTime.of(7, 0))) {
+        } else if (timeAsleep.isBefore(LARK_ASLEEP_BEFORE)
+                && timeWakeUp.isBefore(LARK_WAKE_BEFORE)) {
             return LARK;
         } else {
             return PIGEON;
@@ -55,7 +62,11 @@ public class ClassificationUsersFunction implements SleepAnalyzer {
     public boolean isNightSleep(SleepingSession session) {
         LocalDate date = session.getTimeWakeUp().toLocalDate();
         LocalDateTime startNight = date.atStartOfDay();
-        LocalDateTime finishNight = startNight.plusHours(6);
+        LocalDateTime finishNight = startNight.plusHours(NIGHT_DURATION_HOURS);
         return session.getTimeAsleep().isBefore(finishNight) && session.getTimeWakeUp().isAfter(startNight);
+    }
+
+    public long findCount(List<String> birdList, String bird) {
+        return birdList.stream().filter(bird::equals).count();
     }
 }
