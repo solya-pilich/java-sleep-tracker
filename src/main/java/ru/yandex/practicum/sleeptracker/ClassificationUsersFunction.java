@@ -19,7 +19,7 @@ public class ClassificationUsersFunction implements SleepAnalyzer {
 
         List<String> birdList = sessions.stream()
                 .filter(this::isNightSleep)
-                .map(this::ClassifyNight)
+                .map(this::classifyNight)
                 .toList();
 
         long countOwl = birdList.stream().filter(OWL::equals).count();
@@ -37,7 +37,7 @@ public class ClassificationUsersFunction implements SleepAnalyzer {
         return new SleepAnalysisResult(result, "Хронотип пользователя");
     }
 
-    public String ClassifyNight(SleepingSession session) {
+    public String classifyNight(SleepingSession session) {
         LocalTime timeAsleep = session.getTimeAsleep().toLocalTime();
         LocalTime timeWakeUp = session.getTimeWakeUp().toLocalTime();
 
